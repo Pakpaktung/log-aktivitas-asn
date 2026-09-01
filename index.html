@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Log Aktivitas Harian ASN - Perkebunan</title>
   <meta name="description" content="Aplikasi pencatatan log aktivitas harian ASN Dinas Perkebunan Provinsi Jawa Timur.">
 
@@ -11,7 +11,6 @@
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
 
-  <!-- iOS: buka sebagai aplikasi berdiri sendiri saat ditambahkan ke Layar Utama -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,53 +27,87 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-      background: var(--brand-dark);
+      min-height: 100%;
+      background: linear-gradient(160deg, #2a8c46 0%, #14532d 100%);
+      color: #fff;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
     }
-    #appFrame {
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: var(--safe-top);
-      bottom: var(--safe-bottom);
-      width: 100%;
-      height: calc(100% - var(--safe-top) - var(--safe-bottom));
-      border: 0;
-      background: #f8f9fa;
-      opacity: 0;
-      transition: opacity .35s ease;
-    }
-    #appFrame.ready { opacity: 1; }
-
-    /* ---------- Layar pembuka ---------- */
-    #splash {
-      position: fixed;
-      inset: 0;
+    body {
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.1rem;
-      background: linear-gradient(160deg, #2a8c46 0%, #14532d 100%);
-      color: #fff;
-      z-index: 20;
-      transition: opacity .35s ease, visibility .35s ease;
-      padding: 2rem;
+      padding: calc(2rem + var(--safe-top)) 1.5rem calc(2rem + var(--safe-bottom));
       text-align: center;
     }
-    #splash.hidden { opacity: 0; visibility: hidden; }
-    #splash img {
+
+    .ikon {
       width: 104px;
       height: 104px;
       border-radius: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,.3);
     }
-    #splash .judul { font-size: 1.05rem; font-weight: 700; letter-spacing: .2px; }
-    #splash .sub { font-size: .8rem; opacity: .82; margin-top: -.6rem; }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 1.1rem 0 .25rem;
+      letter-spacing: .2px;
+    }
+    .sub {
+      font-size: .85rem;
+      opacity: .85;
+      margin: 0 0 1.75rem;
+    }
+
+    .tombol {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      border: none;
+      border-radius: 12px;
+      padding: .85rem 1.2rem;
+      font-size: .95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      margin-bottom: .7rem;
+    }
+    .tombol-utama { background: #fff; color: var(--brand-dark); }
+    .tombol-kedua {
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.45);
+      display: none;
+    }
+    .tombol-kedua.tampil { display: block; }
+    .tombol:active { transform: scale(.985); }
+
+    .catatan {
+      font-size: .76rem;
+      opacity: .72;
+      max-width: 340px;
+      line-height: 1.6;
+      margin-top: 1.1rem;
+    }
+
+    /* ---------- Layar pengalihan (saat sudah terpasang) ---------- */
+    #pengalihan {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.1rem;
+      background: linear-gradient(160deg, #2a8c46 0%, #14532d 100%);
+      z-index: 10;
+      padding: 2rem;
+    }
+    #pengalihan.tampil { display: flex; }
     .spinner {
       width: 26px;
       height: 26px;
@@ -85,140 +118,108 @@
     }
     @keyframes putar { to { transform: rotate(360deg); } }
 
-    /* ---------- Status jaringan ---------- */
-    #offlineBar {
-      position: fixed;
-      left: 0; right: 0;
-      top: var(--safe-top);
-      background: #b02a37;
-      color: #fff;
-      font-size: .8rem;
-      padding: .55rem .9rem;
-      text-align: center;
-      z-index: 30;
-      transform: translateY(-100%);
-      transition: transform .25s ease;
+    /* ---------- Panduan pemasangan ---------- */
+    #backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 20; display: none;
     }
-    #offlineBar.show { transform: translateY(0); }
-
-    /* ---------- Tombol pasang ---------- */
-    #installFab {
-      position: fixed;
-      right: 16px;
-      bottom: calc(16px + var(--safe-bottom));
-      z-index: 25;
-      display: none;
-      align-items: center;
-      gap: .5rem;
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      padding: .7rem 1.1rem;
-      font-size: .85rem;
-      font-weight: 600;
-      box-shadow: 0 8px 22px rgba(0,0,0,.28);
-      cursor: pointer;
-    }
-    #installFab.show { display: inline-flex; }
-    #installFab:active { transform: scale(.97); }
-
-    /* ---------- Panduan pemasangan (iOS / cadangan) ---------- */
-    #sheetBackdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 40;
-      display: none;
-    }
-    #sheetBackdrop.show { display: block; }
-    #sheet {
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      z-index: 41;
-      background: #fff;
+    #backdrop.tampil { display: block; }
+    #panduan {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      z-index: 21;
+      background: #fff; color: #222;
       border-radius: 18px 18px 0 0;
       padding: 1.25rem 1.25rem calc(1.5rem + var(--safe-bottom));
       transform: translateY(100%);
       transition: transform .3s ease;
-      max-height: 86vh;
-      overflow-y: auto;
+      max-height: 86vh; overflow-y: auto;
+      text-align: left;
     }
-    #sheet.show { transform: translateY(0); }
-    #sheet h2 { font-size: 1rem; margin: 0 0 .35rem; color: var(--brand-dark); }
-    #sheet p, #sheet li { font-size: .86rem; color: #333; line-height: 1.55; }
-    #sheet ol { padding-left: 1.15rem; margin: .5rem 0 0; }
-    #sheet .grip {
+    #panduan.tampil { transform: translateY(0); }
+    #panduan h2 { font-size: 1rem; margin: 0 0 .5rem; color: var(--brand-dark); }
+    #panduan p, #panduan li { font-size: .86rem; line-height: 1.6; }
+    #panduan ol { padding-left: 1.15rem; margin: .5rem 0 0; }
+    #panduan .grip {
       width: 42px; height: 4px; border-radius: 4px;
       background: #d5d5d5; margin: 0 auto .9rem;
     }
-    #sheet button.tutup {
-      margin-top: 1.1rem;
-      width: 100%;
-      background: var(--brand);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: .7rem;
-      font-weight: 600;
-      font-size: .9rem;
-      cursor: pointer;
+    #panduan .tutup {
+      margin-top: 1.1rem; width: 100%;
+      background: var(--brand); color: #fff; border: none;
+      border-radius: 10px; padding: .75rem;
+      font-weight: 600; font-size: .9rem; font-family: inherit; cursor: pointer;
     }
-    .ikon-inline {
+    .tombol-semu {
       display: inline-block;
-      background: #eef6f0;
-      border: 1px solid #cfe8d6;
-      border-radius: 5px;
-      padding: 0 .35rem;
-      font-weight: 600;
-      color: var(--brand-dark);
+      background: #eef6f0; border: 1px solid #cfe8d6;
+      border-radius: 5px; padding: 0 .35rem;
+      font-weight: 600; color: var(--brand-dark);
     }
 
-    /* ---------- Layar setup bila execUrl belum diisi ---------- */
-    #setup {
-      position: fixed; inset: 0; z-index: 50;
+    #luring {
       display: none;
-      flex-direction: column; justify-content: center;
-      padding: 2rem; background: #fff; color: #222;
-      font-size: .9rem; line-height: 1.6;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 10px;
+      padding: .7rem .9rem;
+      font-size: .8rem;
+      max-width: 340px;
+      margin-bottom: 1.1rem;
     }
-    #setup.show { display: flex; }
+    #luring.tampil { display: block; }
+
+    #setup {
+      display: none;
+      background: rgba(0,0,0,.3);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      font-size: .85rem;
+      line-height: 1.6;
+      max-width: 380px;
+      text-align: left;
+    }
+    #setup.tampil { display: block; }
     #setup code {
-      background: #f1f3f5; padding: .1rem .35rem; border-radius: 4px;
-      font-size: .82rem; word-break: break-all;
+      background: rgba(255,255,255,.16);
+      padding: .1rem .35rem; border-radius: 4px;
+      font-size: .8rem; word-break: break-all;
     }
   </style>
 </head>
 <body>
 
-  <div id="splash">
-    <img src="icons/icon-192.png" alt="">
-    <div class="judul">Log Aktivitas Harian ASN</div>
-    <div class="sub">Dinas Perkebunan Provinsi Jawa Timur</div>
-    <div class="spinner"></div>
-  </div>
+  <img class="ikon" src="icons/icon-192.png" alt="">
+  <h1>Log Aktivitas Harian ASN</h1>
+  <p class="sub">Dinas Perkebunan Provinsi Jawa Timur</p>
 
-  <div id="offlineBar">Tidak ada koneksi internet &mdash; data tidak dapat dimuat atau dikirim.</div>
+  <div id="luring">Tidak ada koneksi internet. Sambungkan perangkat lalu coba lagi.</div>
 
-  <iframe id="appFrame" title="Log Aktivitas Harian ASN" allow="clipboard-write; fullscreen"></iframe>
+  <a class="tombol tombol-utama" id="btnBuka" href="#">Buka Aplikasi</a>
+  <button class="tombol tombol-kedua" id="btnPasang" type="button">Pasang Aplikasi</button>
 
-  <button id="installFab" type="button">&#11015; Pasang Aplikasi</button>
-
-  <div id="sheetBackdrop"></div>
-  <div id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetJudul">
-    <div class="grip"></div>
-    <h2 id="sheetJudul">Pasang di perangkat Anda</h2>
-    <div id="sheetIsi"></div>
-    <button class="tutup" type="button">Mengerti</button>
-  </div>
+  <p class="catatan" id="catatan">
+    Pasang sekali, lalu buka lewat ikon di layar utama seperti aplikasi biasa.
+  </p>
 
   <div id="setup">
-    <h2 style="color:#14532d;margin-top:0;">Konfigurasi belum lengkap</h2>
-    <p>
-      Buka berkas <code>config.js</code> lalu isi <code>execUrl</code> dengan URL Web app
-      Apps Script Anda (Deploy &rsaquo; Kelola deployment &rsaquo; salin URL yang berakhiran
-      <code>/exec</code>).
-    </p>
+    <b>Konfigurasi belum lengkap.</b><br>
+    Isi <code>execUrl</code> pada berkas <code>config.js</code> dengan URL Web app
+    Apps Script yang berakhiran <code>/exec</code>.
+  </div>
+
+  <div id="pengalihan">
+    <img class="ikon" src="icons/icon-192.png" alt="">
+    <div class="spinner"></div>
+    <div style="font-size:.85rem;opacity:.85;">Membuka aplikasi&hellip;</div>
+  </div>
+
+  <div id="backdrop"></div>
+  <div id="panduan" role="dialog" aria-modal="true" aria-labelledby="panduanJudul">
+    <div class="grip"></div>
+    <h2 id="panduanJudul">Pasang di perangkat Anda</h2>
+    <div id="panduanIsi"></div>
+    <button class="tutup" type="button">Mengerti</button>
   </div>
 
   <script src="config.js"></script>
@@ -227,125 +228,125 @@
     'use strict';
 
     var cfg = window.APP_CONFIG || {};
-    var splash = document.getElementById('splash');
-    var frame = document.getElementById('appFrame');
-    var fab = document.getElementById('installFab');
-    var sheet = document.getElementById('sheet');
-    var backdrop = document.getElementById('sheetBackdrop');
-    var sheetIsi = document.getElementById('sheetIsi');
-    var offlineBar = document.getElementById('offlineBar');
+    var btnBuka = document.getElementById('btnBuka');
+    var btnPasang = document.getElementById('btnPasang');
+    var panduan = document.getElementById('panduan');
+    var backdrop = document.getElementById('backdrop');
+    var panduanIsi = document.getElementById('panduanIsi');
 
-    // ---------- Deteksi lingkungan ----------
     var ua = navigator.userAgent || '';
     var isIOS = /iPad|iPhone|iPod/.test(ua) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isAndroid = /Android/i.test(ua);
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.matchMedia('(display-mode: minimal-ui)').matches ||
                        window.navigator.standalone === true;
 
-    // ---------- Muat aplikasi Apps Script di dalam bingkai ----------
+    // ---------- Konfigurasi ----------
     if (!cfg.execUrl || cfg.execUrl.indexOf('/exec') === -1) {
-      splash.classList.add('hidden');
-      document.getElementById('setup').classList.add('show');
+      document.getElementById('setup').classList.add('tampil');
+      btnBuka.style.display = 'none';
+      document.getElementById('catatan').style.display = 'none';
       return;
     }
 
     var qs = new URLSearchParams(window.location.search);
-    var src = cfg.execUrl +
+    var urlAplikasi = cfg.execUrl +
       (cfg.execUrl.indexOf('?') === -1 ? '?' : '&') +
-      'app=pwa&mode=' + (isStandalone ? 'standalone' : 'browser');
-    if (qs.get('tab')) src += '&tab=' + encodeURIComponent(qs.get('tab'));
+      'mode=' + (isStandalone ? 'standalone' : 'browser');
+    if (qs.get('tab')) urlAplikasi += '&tab=' + encodeURIComponent(qs.get('tab'));
 
-    frame.src = src;
-
-    var sudahTampil = false;
-    function tampilkanAplikasi() {
-      if (sudahTampil) return;
-      sudahTampil = true;
-      frame.classList.add('ready');
-      splash.classList.add('hidden');
-    }
-    frame.addEventListener('load', function () { setTimeout(tampilkanAplikasi, 250); });
-    // Jaring pengaman bila peristiwa load tidak terkirim.
-    setTimeout(tampilkanAplikasi, 12000);
+    btnBuka.href = urlAplikasi;
 
     // ---------- Status jaringan ----------
-    function perbaruiStatusJaringan() {
-      offlineBar.classList.toggle('show', !navigator.onLine);
+    var luring = document.getElementById('luring');
+    function perbaruiJaringan() {
+      luring.classList.toggle('tampil', !navigator.onLine);
     }
-    window.addEventListener('online', perbaruiStatusJaringan);
-    window.addEventListener('offline', perbaruiStatusJaringan);
-    perbaruiStatusJaringan();
+    window.addEventListener('online', perbaruiJaringan);
+    window.addEventListener('offline', perbaruiJaringan);
+    perbaruiJaringan();
+
+    // ---------- Sudah terpasang: langsung buka aplikasi ----------
+    // Halaman ini hanya berperan sebagai peluncur. Aplikasi dibuka lewat navigasi
+    // tingkat atas (bukan iframe) agar proses login Google berjalan normal.
+    if (isStandalone && navigator.onLine) {
+      document.getElementById('pengalihan').classList.add('tampil');
+      window.location.replace(urlAplikasi);
+      return;
+    }
 
     // ---------- Panduan pemasangan ----------
     var PANDUAN_IOS =
-      '<p>Safari di iPhone/iPad memasang aplikasi lewat menu Bagikan:</p>' +
+      '<p>Di iPhone/iPad, buka halaman ini memakai <b>Safari</b> lalu:</p>' +
       '<ol>' +
-      '<li>Ketuk tombol <span class="ikon-inline">Bagikan</span> di bilah bawah Safari.</li>' +
-      '<li>Gulir lalu pilih <span class="ikon-inline">Tambah ke Layar Utama</span>.</li>' +
-      '<li>Ketuk <span class="ikon-inline">Tambah</span> di kanan atas.</li>' +
+      '<li>Ketuk tombol <span class="tombol-semu">Bagikan</span> di bilah bawah.</li>' +
+      '<li>Gulir lalu pilih <span class="tombol-semu">Tambah ke Layar Utama</span>.</li>' +
+      '<li>Ketuk <span class="tombol-semu">Tambah</span> di kanan atas.</li>' +
       '</ol>' +
-      '<p style="margin-top:.8rem">Ikon aplikasi akan muncul di Layar Utama dan terbuka layar penuh tanpa bilah alamat.</p>';
+      '<p style="margin-top:.9rem"><b>Alternatif yang lebih ringkas untuk iOS:</b> buka langsung ' +
+      'alamat aplikasi Apps Script-nya di Safari, lalu Tambah ke Layar Utama dari sana. ' +
+      'Aplikasi tetap terbuka layar penuh dan tanpa langkah perantara.</p>';
 
-    var PANDUAN_UMUM =
-      '<p>Peramban Anda belum menawarkan pemasangan otomatis. Anda tetap dapat memasangnya secara manual:</p>' +
+    var PANDUAN_ANDROID =
+      '<p>Di Android (Chrome atau Edge):</p>' +
       '<ol>' +
-      '<li><b>Chrome/Edge Android:</b> menu <span class="ikon-inline">&#8942;</span> &rsaquo; <span class="ikon-inline">Instal aplikasi</span> atau <span class="ikon-inline">Tambahkan ke layar utama</span>.</li>' +
-      '<li><b>Chrome/Edge Desktop:</b> ikon <span class="ikon-inline">&#11015;</span> di ujung kanan bilah alamat, atau menu &rsaquo; <span class="ikon-inline">Cast, simpan, dan bagikan</span> &rsaquo; <span class="ikon-inline">Instal halaman sebagai aplikasi</span>.</li>' +
-      '<li><b>Firefox Android:</b> menu &rsaquo; <span class="ikon-inline">Instal</span>.</li>' +
-      '</ol>' +
-      '<p style="margin-top:.8rem">Catatan: pemasangan otomatis hanya ditawarkan pada koneksi HTTPS.</p>';
+      '<li>Ketuk menu <span class="tombol-semu">&#8942;</span> di kanan atas peramban.</li>' +
+      '<li>Pilih <span class="tombol-semu">Instal aplikasi</span> atau ' +
+      '<span class="tombol-semu">Tambahkan ke layar utama</span>.</li>' +
+      '<li>Ketuk <span class="tombol-semu">Instal</span> untuk mengonfirmasi.</li>' +
+      '</ol>';
+
+    var PANDUAN_DESKTOP =
+      '<p>Di komputer (Chrome atau Edge):</p>' +
+      '<ol>' +
+      '<li>Klik ikon <span class="tombol-semu">&#11015;</span> di ujung kanan bilah alamat, atau buka ' +
+      'menu <span class="tombol-semu">&#8942;</span> &rsaquo; ' +
+      '<span class="tombol-semu">Cast, simpan, dan bagikan</span>.</li>' +
+      '<li>Pilih <span class="tombol-semu">Instal halaman sebagai aplikasi</span>.</li>' +
+      '</ol>';
 
     function bukaPanduan(isi) {
-      sheetIsi.innerHTML = isi;
-      backdrop.classList.add('show');
-      sheet.classList.add('show');
+      panduanIsi.innerHTML = isi;
+      backdrop.classList.add('tampil');
+      panduan.classList.add('tampil');
     }
     function tutupPanduan() {
-      backdrop.classList.remove('show');
-      sheet.classList.remove('show');
+      backdrop.classList.remove('tampil');
+      panduan.classList.remove('tampil');
     }
     backdrop.addEventListener('click', tutupPanduan);
-    sheet.querySelector('.tutup').addEventListener('click', tutupPanduan);
+    panduan.querySelector('.tutup').addEventListener('click', tutupPanduan);
 
-    // ---------- Alur pemasangan ----------
+    // ---------- Pemasangan ----------
     var promptTersimpan = null;
 
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       promptTersimpan = e;
-      if (!isStandalone) fab.classList.add('show');
+      btnPasang.classList.add('tampil');
     });
 
     window.addEventListener('appinstalled', function () {
       promptTersimpan = null;
-      fab.classList.remove('show');
+      btnPasang.classList.remove('tampil');
       tutupPanduan();
     });
 
-    function jalankanPemasangan() {
+    btnPasang.addEventListener('click', function () {
       if (promptTersimpan) {
         promptTersimpan.prompt();
         promptTersimpan.userChoice.then(function (pilihan) {
-          if (pilihan.outcome === 'accepted') fab.classList.remove('show');
+          if (pilihan.outcome === 'accepted') btnPasang.classList.remove('tampil');
           promptTersimpan = null;
         });
         return;
       }
-      bukaPanduan(isIOS ? PANDUAN_IOS : PANDUAN_UMUM);
-    }
-
-    fab.addEventListener('click', jalankanPemasangan);
+      bukaPanduan(isIOS ? PANDUAN_IOS : (isAndroid ? PANDUAN_ANDROID : PANDUAN_DESKTOP));
+    });
 
     // iOS tidak mendukung beforeinstallprompt, jadi tombolnya ditampilkan langsung.
-    if (isIOS && !isStandalone) fab.classList.add('show');
-
-    // ---------- Jembatan pesan dari aplikasi di dalam bingkai ----------
-    // Halaman Apps Script berada di origin lain, jadi ia mengirim pesan ke window.top.
-    window.addEventListener('message', function (event) {
-      var data = event.data;
-      if (!data || data.source !== 'log-aktivitas-asn') return;
-      if (data.action === 'install') jalankanPemasangan();
-    });
+    if (isIOS) btnPasang.classList.add('tampil');
 
     // ---------- Service worker ----------
     if ('serviceWorker' in navigator) {
