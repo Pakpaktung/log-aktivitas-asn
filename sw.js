@@ -5,7 +5,9 @@
  * TIDAK pernah di-cache — selalu diambil langsung dari jaringan karena bersifat
  * dinamis dan lintas-origin. Yang di-cache hanya cangkang PWA-nya.
  */
-const CACHE = 'log-aktivitas-shell-v1';
+// Naikkan nomor versi setiap kali isi cangkang berubah, agar service worker lama
+// digantikan dan seluruh cache lamanya dibuang saat aktivasi.
+const CACHE = 'log-aktivitas-shell-v2';
 const SHELL = [
   './',
   './index.html',
@@ -46,16 +48,22 @@ self.addEventListener('fetch', (event) => {
   // Biarkan semua permintaan lintas-origin (Apps Script, CDN Bootstrap, dll) apa adanya.
   if (url.origin !== self.location.origin) return;
 
-  // Navigasi: coba jaringan dulu, jatuh ke cangkang bila offline.
-  if (req.mode === 'navigate') {
+  // Navigasi dan konfigurasi: selalu utamakan jaringan, jatuh ke cache bila offline.
+  // `cache: 'reload'` melewati cache HTTP peramban — tanpa ini GitHub Pages
+  // (max-age=600) masih menyajikan cangkang lama sampai sepuluh menit setelah rilis.
+  const isNavigasi = req.mode === 'navigate';
+  const isConfig = url.pathname.endsWith('/config.js');
+
+  if (isNavigasi || isConfig) {
+    const kunci = isNavigasi ? './index.html' : req;
     event.respondWith(
-      fetch(req)
+      fetch(new Request(req.url, { cache: 'reload', credentials: 'same-origin' }))
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put('./index.html', copy));
+          caches.open(CACHE).then((c) => c.put(kunci, copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(kunci))
     );
     return;
   }
