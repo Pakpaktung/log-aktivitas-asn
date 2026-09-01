@@ -1,0 +1,35 @@
+{
+  "id": "/log-aktivitas-asn/",
+  "name": "Log Aktivitas Harian ASN - Perkebunan",
+  "short_name": "Log Aktivitas",
+  "description": "Aplikasi pencatatan log aktivitas harian ASN Dinas Perkebunan Provinsi Jawa Timur.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "background_color": "#14532d",
+  "theme_color": "#1e6b33",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Input Aktivitas",
+      "short_name": "Input",
+      "url": "./index.html?tab=input",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rekap Bulanan",
+      "short_name": "Rekap",
+      "url": "./index.html?tab=rekap",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
