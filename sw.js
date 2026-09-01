@@ -7,7 +7,7 @@
  */
 // Naikkan nomor versi setiap kali isi cangkang berubah, agar service worker lama
 // digantikan dan seluruh cache lamanya dibuang saat aktivasi.
-const CACHE = 'log-aktivitas-shell-v2';
+const CACHE = 'log-aktivitas-shell-v3';
 const SHELL = [
   './',
   './index.html',
